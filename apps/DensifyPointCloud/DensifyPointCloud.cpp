@@ -238,7 +238,7 @@ int main(int argc, LPCTSTR* argv)
 	}
 	// load and estimate a dense point-cloud
 	// 接受SLAM位姿的话将下面这行代码的屏蔽符去掉
-//#define use_custom_pose   //使用SLAM位姿
+#define use_custom_pose   //使用SLAM位姿
 #ifdef use_custom_pose
     if(!load_scene(string(MAKE_PATH_SAFE(OPT::strInputFileName)),scene))
 		return EXIT_FAILURE;

@@ -37,3 +37,6 @@ CMakeSettings.json
 out/
 bin/
 binaries/
+.vscode/settings.json
+data/Daiwu_sample
+.gitignore

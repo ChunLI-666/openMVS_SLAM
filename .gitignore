@@ -38,6 +38,6 @@ out/
 bin/
 binaries/
 .vscode/settings.json
-data/Daiwu_sample
+data/*
 docs/《视觉几何三维重建-OpenMVS源码解析》课程手册9.28.pdf
 .vscode/settings.json

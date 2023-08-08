@@ -184,12 +184,16 @@ bool load_scene(string file,Scene &scene)
 	scene.nCalibratedImages = 0;
     cout << "numViews " << mvs_pose.poses.size() << endl;
     vector<POINT3F> points;
+	std::cout << "==DEBUG start == " << std::endl;
+
 	for (int count = 0; count < numViews; count++)
 	{
+		std::cout << "==DEBUG: Load  " << count << "numViews" << std::endl;
 		int idx = count; //true idx
 		MVS::Image& image = scene.images.AddEmpty();
 
-        string name=string(WORKING_FOLDER)+"images/"+mvs_pose.images_name[idx]+".png";
+        string name=string(WORKING_FOLDER)+"images/"+ mvs_pose.images_name[idx]+".jpg";
+		std::cout << "==DEBUG: Loading " << name << std::endl;
         image.name=name;
         image.platformID = scene.platforms.GetSize();
         image.cameraID = 0;

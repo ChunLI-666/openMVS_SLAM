@@ -259,17 +259,17 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	if ((ARCHIVE_TYPE)OPT::nArchiveType != ARCHIVE_MVS) {
-		TD_TIMER_START();
-		if (!scene.DenseReconstruction(OPT::nFusionMode)) {
-			if (ABS(OPT::nFusionMode) != 1)
-				return EXIT_FAILURE;
-			VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
-			Finalize();
-			return EXIT_SUCCESS;
-		}
-		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
-	}
+	// if ((ARCHIVE_TYPE)OPT::nArchiveType != ARCHIVE_MVS) {
+	// 	TD_TIMER_START();
+	// 	if (!scene.DenseReconstruction(OPT::nFusionMode)) {
+	// 		if (ABS(OPT::nFusionMode) != 1)
+	// 			return EXIT_FAILURE;
+	// 		VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
+	// 		Finalize();
+	// 		return EXIT_SUCCESS;
+	// 	}
+	// 	VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
+	// }
 
 	// save the final mesh
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));

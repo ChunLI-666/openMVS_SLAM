@@ -208,7 +208,7 @@ bool load_scene(string file,Scene &scene)
 		camera.K = MVS::Platform::Camera::ComposeK<REAL, REAL>(mvs_pose.poses[idx].K[0], mvs_pose.poses[idx].K[4] , 2.0*mvs_pose.poses[idx].K[2] , 2.0*mvs_pose.poses[idx].K[5]);
 		camera.R = RMatrix::IDENTITY;
 		camera.C = CMatrix::ZERO;
-//        cout << "camera.K" << camera.K << endl;
+       	cout << "camera.K" << camera.K << endl;
 		// normalize camera intrinsics
 		const REAL fScale(REAL(1) / MVS::Camera::GetNormalizationScale(image.width, image.height));
 		camera.K(0, 0) *= fScale;
@@ -229,8 +229,8 @@ bool load_scene(string file,Scene &scene)
 			pose.C.ptr()[j] = -float(double(mvs_pose.poses[idx].rot[j])*double(mvs_pose.poses[idx].trans[0]) + double(mvs_pose.poses[idx].rot[3 + j])*double(mvs_pose.poses[idx].trans[1]) + double(mvs_pose.poses[idx].rot[6 + j])*double(mvs_pose.poses[idx].trans[2]));
 		}
 
-//		cout <<"image.poseID " << image.poseID <<"image.platformID"<<image.platformID<<endl;
-//		cout << "camera.R\n"<<camera.R << "camera.C" << camera.C << endl;
+		cout <<"image.poseID " << image.poseID <<"image.platformID"<<image.platformID<<endl;
+		cout << "camera.R\n"<<camera.R << "camera.C" << camera.C << endl;
 
         POINT3F point_tmp(pose.C.x,pose.C.y,pose.C.z);
 		points.push_back(point_tmp);
@@ -239,7 +239,7 @@ bool load_scene(string file,Scene &scene)
 
 		++scene.nCalibratedImages;
 
-//		cout <<"nCalibratedImages" << scene.nCalibratedImages << endl;
+		cout <<"nCalibratedImages" << scene.nCalibratedImages << endl;
 	}
     std::cout << "deal with feature points" << std::endl;
 	//deal with feature points
@@ -256,8 +256,8 @@ bool load_scene(string file,Scene &scene)
 			views.InsertSort(mvs_pose.views[idx][viewId]);
 		}
 	}
-//    RGB color(255,0,0);
-//    save_pointcloud_obj(file + "/track_1.obj", points,mvs_pose.poses.size(),color);
+	// RGB color(255,0,0);
+	// save_pointcloud_obj(file + "/track_1.obj", points, mvs_pose.poses.size(), color);
 	return true;
 }
 //从关联文件中提取这些需要加载的图像的路径和时间戳

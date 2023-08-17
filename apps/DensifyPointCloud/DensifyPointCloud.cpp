@@ -238,7 +238,7 @@ int main(int argc, LPCTSTR* argv)
 	}
 	// load and estimate a dense point-cloud
 	// 接受SLAM位姿的话将下面这行代码的屏蔽符去掉
-//#define use_custom_pose   //使用SLAM位姿
+#define use_custom_pose   //使用SLAM位姿
 #ifdef use_custom_pose
     if(!load_scene(string(MAKE_PATH_SAFE(OPT::strInputFileName)),scene))
 		return EXIT_FAILURE;
@@ -259,17 +259,17 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	if ((ARCHIVE_TYPE)OPT::nArchiveType != ARCHIVE_MVS) {
-		TD_TIMER_START();
-		if (!scene.DenseReconstruction(OPT::nFusionMode)) {
-			if (ABS(OPT::nFusionMode) != 1)
-				return EXIT_FAILURE;
-			VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
-			Finalize();
-			return EXIT_SUCCESS;
-		}
-		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
-	}
+	// if ((ARCHIVE_TYPE)OPT::nArchiveType != ARCHIVE_MVS) {
+	// 	TD_TIMER_START();
+	// 	if (!scene.DenseReconstruction(OPT::nFusionMode)) {
+	// 		if (ABS(OPT::nFusionMode) != 1)
+	// 			return EXIT_FAILURE;
+	// 		VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
+	// 		Finalize();
+	// 		return EXIT_SUCCESS;
+	// 	}
+	// 	VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
+	// }
 
 	// save the final mesh
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));

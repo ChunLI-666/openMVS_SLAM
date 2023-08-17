@@ -1640,6 +1640,7 @@ bool Scene::DenseReconstruction(int nFusionMode)
 	// Step 1 深度图计算两种方式：patchMatch nFusionMode=1；SGM/tSGM nFusionMode=-1 通过nFusionMode控制可以通过这个参数设置对
 	// 这两种算法进行效果性能对比
 	if (!ComputeDepthMaps(data))
+		std::cout << "compute depth map failed" << std::endl;
 		return false;
 	if (ABS(nFusionMode) == 1)
 		return true;
@@ -1813,13 +1814,15 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// initialize the queue of images to be processed
 	// Step 3 深度计算，分多线程和单线程，主要是通过事件队列实现整个 working 流程。
 	// 事件队列，多线程
+	VERBOSE("Step 3: Depth calculation - initialize the queue of images to be processed");
 	data.idxImage = 0;
 	ASSERT(data.events.IsEmpty());
 	data.events.AddEvent(new EVTProcessImage(0));
 	// start working threads
 	// 启动工作线程
+	VERBOSE("Step 3.1: Depth calculation - Start working threads");
 	data.progress = new Util::Progress("Estimated depth-maps", data.images.GetSize());
-	GET_LOGCONSOLE().Pause();
+	// GET_LOGCONSOLE().Pause();
 	if (nMaxThreads > 1) {
 		// multi-thread execution
 		//? 为什么depth计算只用两个线程
@@ -1834,12 +1837,14 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		// 单线程计算，如果想调试可以设线程数为1使用该函数
 		DenseReconstructionEstimate((void*)&data);
 	}
-	GET_LOGCONSOLE().Play();
+	// GET_LOGCONSOLE().Play();
 	if (!data.events.IsEmpty())
+		VERBOSE("Step 3.2: Error - data event is not empty");
 		return false;
 	data.progress.Release();
 
 	// Step 4 深度图优化：主要是对depth进行滤波（帧间滤波）去噪填充一些孔洞
+	VERBOSE("Step 4: Depth image refinement");
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();

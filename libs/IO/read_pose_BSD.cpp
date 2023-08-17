@@ -120,11 +120,9 @@ bool read_mvs_pose(string file,MVSPOSE &mvs_pose)
 			}
 		}
         Eigen::Vector3d t(pose.trans[0],pose.trans[1],pose.trans[2]);
-        // Eigen::Vector3d Ow = -R.inverse()* t;
+        Eigen::Vector3d Ow = -R.inverse()* t;
 
-        // POINT3F  Q(Ow[0],Ow[1],Ow[2]);
-        POINT3F  Q(pose.trans[0],pose.trans[1],pose.trans[2]);
-
+        POINT3F  Q(Ow[0],Ow[1],Ow[2]);
         points.push_back(Q);
 		mvs_pose.poses.push_back(pose);
 	}
@@ -171,11 +169,12 @@ bool read_mvs_pose(string file,MVSPOSE &mvs_pose)
     save_pointcloud_obj(string(WORKING_FOLDER) + "/track.obj", points,mvs_pose.poses.size(),color);
 	return true;
 }
+
 bool load_scene(string file,Scene &scene)
 {
-    std::cout << "We are using Keyframe from SLAM to achieve 3D reconstruction" << std::endl;
+    std::cout << "BSD mesh generation: We are using Keyframe from LIO-SAM and ORB-SLAM to achieve 3D reconstruction" << std::endl;
     MVSPOSE mvs_pose;
-	if(!read_mvs_pose(file,mvs_pose))
+	if(!read_mvs_pose(file,mvs_pose)) // TODO: use LO and VO output data as the input of read_mvs_pose 
 	{
 		return false;
 	}
@@ -186,16 +185,12 @@ bool load_scene(string file,Scene &scene)
 	scene.nCalibratedImages = 0;
     cout << "numViews " << mvs_pose.poses.size() << endl;
     vector<POINT3F> points;
-	std::cout << "==DEBUG start == " << std::endl;
-
 	for (int count = 0; count < numViews; count++)
 	{
-		std::cout << "==DEBUG: Load  " << count << "numViews" << std::endl;
 		int idx = count; //true idx
 		MVS::Image& image = scene.images.AddEmpty();
 
-        string name=string(WORKING_FOLDER)+"images/"+ mvs_pose.images_name[idx]+".jpg";
-		std::cout << "==DEBUG: Loading " << name << std::endl;
+        string name=string(WORKING_FOLDER)+"images/"+mvs_pose.images_name[idx]+".png";
         image.name=name;
         image.platformID = scene.platforms.GetSize();
         image.cameraID = 0;
@@ -210,7 +205,7 @@ bool load_scene(string file,Scene &scene)
 		camera.K = MVS::Platform::Camera::ComposeK<REAL, REAL>(mvs_pose.poses[idx].K[0], mvs_pose.poses[idx].K[4] , 2.0*mvs_pose.poses[idx].K[2] , 2.0*mvs_pose.poses[idx].K[5]);
 		camera.R = RMatrix::IDENTITY;
 		camera.C = CMatrix::ZERO;
-       	cout << "camera.K" << camera.K << endl;
+//        cout << "camera.K" << camera.K << endl;
 		// normalize camera intrinsics
 		const REAL fScale(REAL(1) / MVS::Camera::GetNormalizationScale(image.width, image.height));
 		camera.K(0, 0) *= fScale;
@@ -226,18 +221,13 @@ bool load_scene(string file,Scene &scene)
 			pose.R.val[n] = mvs_pose.poses[idx].rot[n];
 		}
 
-		// for (int j = 0; j < 3; ++j)
-		// {
-		// 	pose.C.ptr()[j] = -float(double(mvs_pose.poses[idx].rot[j])*double(mvs_pose.poses[idx].trans[0]) + double(mvs_pose.poses[idx].rot[3 + j])*double(mvs_pose.poses[idx].trans[1]) + double(mvs_pose.poses[idx].rot[6 + j])*double(mvs_pose.poses[idx].trans[2]));
-		// }
-
 		for (int j = 0; j < 3; ++j)
 		{
-			pose.C.ptr()[j] = double(mvs_pose.poses[idx].trans[j]);
+			pose.C.ptr()[j] = -float(double(mvs_pose.poses[idx].rot[j])*double(mvs_pose.poses[idx].trans[0]) + double(mvs_pose.poses[idx].rot[3 + j])*double(mvs_pose.poses[idx].trans[1]) + double(mvs_pose.poses[idx].rot[6 + j])*double(mvs_pose.poses[idx].trans[2]));
 		}
 
-		cout <<"image.poseID " << image.poseID <<"image.platformID"<<image.platformID<<endl;
-		cout << "camera.R\n"<<camera.R << "camera.C" << camera.C << endl;
+//		cout <<"image.poseID " << image.poseID <<"image.platformID"<<image.platformID<<endl;
+//		cout << "camera.R\n"<<camera.R << "camera.C" << camera.C << endl;
 
         POINT3F point_tmp(pose.C.x,pose.C.y,pose.C.z);
 		points.push_back(point_tmp);
@@ -246,7 +236,7 @@ bool load_scene(string file,Scene &scene)
 
 		++scene.nCalibratedImages;
 
-		cout <<"nCalibratedImages" << scene.nCalibratedImages << endl;
+//		cout <<"nCalibratedImages" << scene.nCalibratedImages << endl;
 	}
     std::cout << "deal with feature points" << std::endl;
 	//deal with feature points
@@ -263,8 +253,8 @@ bool load_scene(string file,Scene &scene)
 			views.InsertSort(mvs_pose.views[idx][viewId]);
 		}
 	}
-	RGB color(255,0,0);
-	save_pointcloud_obj(string(WORKING_FOLDER)  + "/track_1.obj", points, mvs_pose.poses.size(), color);
+//    RGB color(255,0,0);
+//    save_pointcloud_obj(file + "/track_1.obj", points,mvs_pose.poses.size(),color);
 	return true;
 }
 //从关联文件中提取这些需要加载的图像的路径和时间戳

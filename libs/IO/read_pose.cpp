@@ -120,9 +120,11 @@ bool read_mvs_pose(string file,MVSPOSE &mvs_pose)
 			}
 		}
         Eigen::Vector3d t(pose.trans[0],pose.trans[1],pose.trans[2]);
-        Eigen::Vector3d Ow = -R.inverse()* t;
+        // Eigen::Vector3d Ow = -R.inverse()* t;
 
-        POINT3F  Q(Ow[0],Ow[1],Ow[2]);
+        // POINT3F  Q(Ow[0],Ow[1],Ow[2]);
+        POINT3F  Q(pose.trans[0],pose.trans[1],pose.trans[2]);
+
         points.push_back(Q);
 		mvs_pose.poses.push_back(pose);
 	}
@@ -224,9 +226,14 @@ bool load_scene(string file,Scene &scene)
 			pose.R.val[n] = mvs_pose.poses[idx].rot[n];
 		}
 
+		// for (int j = 0; j < 3; ++j)
+		// {
+		// 	pose.C.ptr()[j] = -float(double(mvs_pose.poses[idx].rot[j])*double(mvs_pose.poses[idx].trans[0]) + double(mvs_pose.poses[idx].rot[3 + j])*double(mvs_pose.poses[idx].trans[1]) + double(mvs_pose.poses[idx].rot[6 + j])*double(mvs_pose.poses[idx].trans[2]));
+		// }
+
 		for (int j = 0; j < 3; ++j)
 		{
-			pose.C.ptr()[j] = -float(double(mvs_pose.poses[idx].rot[j])*double(mvs_pose.poses[idx].trans[0]) + double(mvs_pose.poses[idx].rot[3 + j])*double(mvs_pose.poses[idx].trans[1]) + double(mvs_pose.poses[idx].rot[6 + j])*double(mvs_pose.poses[idx].trans[2]));
+			pose.C.ptr()[j] = double(mvs_pose.poses[idx].trans[j]);
 		}
 
 		cout <<"image.poseID " << image.poseID <<"image.platformID"<<image.platformID<<endl;
@@ -256,8 +263,8 @@ bool load_scene(string file,Scene &scene)
 			views.InsertSort(mvs_pose.views[idx][viewId]);
 		}
 	}
-	// RGB color(255,0,0);
-	// save_pointcloud_obj(file + "/track_1.obj", points, mvs_pose.poses.size(), color);
+	RGB color(255,0,0);
+	save_pointcloud_obj(string(WORKING_FOLDER)  + "/track_1.obj", points, mvs_pose.poses.size(), color);
 	return true;
 }
 //从关联文件中提取这些需要加载的图像的路径和时间戳

@@ -66,6 +66,7 @@ public:
 
 	unsigned nMaxThreads;       // 最大线程。  maximum number of threads used to distribute the work load
 
+
 public:
 	// 构造函数，创建scene对象
 	inline Scene(unsigned _nMaxThreads=0) : nMaxThreads(Thread::getMaxThreads(_nMaxThreads)) {}

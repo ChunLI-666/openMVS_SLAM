@@ -47,3 +47,4 @@ scripts/eval_visible_point.ipynb
 scripts/__pycache__/pose_interp.cpython-310.pyc
 .gitignore
 scripts/__pycache__/pose_interp.cpython-38.pyc
+build/*

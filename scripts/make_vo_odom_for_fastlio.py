@@ -5,8 +5,10 @@ from pose_interp import interpolate_poses
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-path_to_scan_states = "/home/icl2sgh/catkin_fastlio_ws/src/FAST_LIO_SLAM/FAST-LIO/result/zhongnan/fastlio_test_0311/scan_states.txt"
-path_to_visual_odom_timestamp = "/home/icl2sgh/catkin_fastlio_ws/src/FAST_LIO_SLAM/FAST-LIO/result/zhongnan/fastlio_test_0311/image_timestamps.txt"
+path_to_scan_states = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom_in_lidar_ts.txt"
+path_to_visual_odom_timestamp = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom.txt"
+path_to_output = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/vo_interpolated_odom.txt"
+
 # T_lidar_to_cam = np.array()
 Tlc = [
         -0.9999487,
@@ -67,7 +69,6 @@ Tci = [
 #     ]
 
 
-path_to_output = "/home/icl2sgh/catkin_fastlio_ws/src/FAST_LIO_SLAM/FAST-LIO/result/zhongnan/fastlio_test_0311/vo_interpolated_odom.txt"
 
 def read_scan_states(file_path):
     """读取scan_states文件并提取时间戳、位置和旋转数据."""
@@ -81,7 +82,8 @@ def read_scan_states(file_path):
                     continue
                 timestamp = float(parts[0])
                 position = np.array(parts[1:4], dtype=float)
-                rotation = np.array(parts[4:8], dtype=float)  # quaternion [x, y, z, w]
+                rotation = np.array(parts[4:8], dtype=float)  # quaternion [w, x, y, z]
+                rotation = np.array([rotation[1],rotation[2],rotation[3],rotation[0]]) #[x, y, z, w]
                 scan_states.append((timestamp, position, rotation))
     except FileNotFoundError:
         logging.error("File not found: %s", file_path)
@@ -106,6 +108,7 @@ def interpolate_scan_states(scan_states, timestamps):
     """使用SE3插值scan_states以匹配visual_odom的时间戳."""
     pose_timestamps = [int(state[0] * 1e6) for state in scan_states] 
 
+    # print("pose_timestamps is: ",pose_timestamps)
     abs_poses = [np.concatenate((state[1], state[2])) for state in scan_states]  # 合并位置和旋转为一个数组
 
     origin_timestamp = int(pose_timestamps[0])
@@ -130,7 +133,9 @@ def save_camera_odometry(camera_states, timestamps, file_path):
             #     file.write(f"{ts} {position[0]} {position[1]} {position[2]} {rotation[0]} {rotation[1]} {rotation[2]} {rotation[3]}\n")
 
             for ts, position, rotation in camera_states:
-                file.write(f"{ts:.6f} {position[0]} {position[1]} {position[2]} {rotation[0]} {rotation[1]} {rotation[2]} {rotation[3]}\n") 
+                # file.write(f"{ts:.6f} {position[0]} {position[1]} {position[2]} {rotation[0]} {rotation[1]} {rotation[2]} {rotation[3]}\n") 
+                file.write(f"{ts:.6f} {position[0]:.8f} {position[1]:.8f} {position[2]:.8f} {rotation[0]:.8f} {rotation[1]:.8f} {rotation[2]:.8f} {rotation[3]:.8f}\n") 
+
     except IOError as e:
         logging.error("Failed to write to file %s: %s", file_path, e)
 
@@ -144,12 +149,37 @@ def read_visual_odom_timestamps(file_path):
     #     logging.error("File not found: %s", file_path)
     #     raise
 
-    timestamps = np.genfromtxt(file_path)
+    timestamps = []
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                parts = line.split()
+                if len(parts) < 8:
+                    logging.error("Invalid line with insufficient data: %s", line)
+                    continue
+                timestamp = float(parts[0])
+                # print("timestamp is ", timestamp)
+
+                # position = np.array(parts[1:4], dtype=float)
+                # rotation = np.array(parts[4:8], dtype=float)  # quaternion [w, x, y, z]
+                # rotation = np.array([rotation[1],rotation[2],rotation[3],rotation[0]]) #[x, y, z, w]
+                timestamps.append((timestamp))
+    except FileNotFoundError:
+        logging.error("File not found: %s", file_path)
+        raise
+    # timestamps = [int(ts[0] * 1e6) for ts in timestamps] 
+    timestamps_np = np.array(timestamps)
+    timestamps_np = np.squeeze(timestamps_np[:]) * 1e6
+    timestamps_list = timestamps_np.astype(np.int64).tolist()
+    # print(timestamps_list)
+    return timestamps_list
+
+    # timestamps = np.genfromtxt(file_path)
     
-    timestamps = np.squeeze(timestamps[:]) * 1e6
-    timestamps = timestamps.astype(np.int64).tolist()
-    # print(f"{timestamps:.6f}")
-    return timestamps
+    # timestamps = np.squeeze(timestamps[:]) * 1e6
+    # timestamps = timestamps.astype(np.int64).tolist()
+    # # print(f"{timestamps:.6f}")
+    # return timestamps
 
 def transform_to_camera_frame(interpolated_states, T_cam_imu):
     """使用imu到相机的外参转换imu odometry到相机odometry."""
@@ -161,7 +191,6 @@ def transform_to_camera_frame(interpolated_states, T_cam_imu):
         # V3D odom_t_lidar = state_point.pos + state_point.rot * state_point.offset_T_L_I;
         
         # 对于旋转，我们需要将四元数转换为旋转矩阵，然后应用变换，最后转换回四元数
-        # 注意这一步骤依赖于具体如何表示旋转，这里只是提供一个大致的框架
         T_imu_cam = np.linalg.inv(T_cam_imu)
         rot_matrix = R.from_quat(quaternion).as_matrix()  # 假设quaternion是[x, y, z, w]格式
         cam_rot_matrix = np.dot(rot_matrix, T_imu_cam[:3, :3], )  # 应用旋转部分的变换
@@ -186,7 +215,7 @@ if __name__=="__main__":
     # T_cam_to_lid = np.array(Tlc).reshape(4,4)
     # T_lidar_to_cam = np.linalg.inv(T_cam_to_lid)
 
-    T_cam_imu = np.array(Tci).reshape(4,4)
-    camera_states = transform_to_camera_frame(interpolated_states, T_cam_imu)
+    # T_cam_imu = np.array(Tci).reshape(4,4)
+    # camera_states = transform_to_camera_frame(interpolated_states, T_cam_imu)
     # camera_states = interpolated_states
-    save_camera_odometry(camera_states, visual_timestamps, path_to_output)
+    save_camera_odometry(interpolated_states, visual_timestamps, path_to_output)

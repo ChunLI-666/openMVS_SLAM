@@ -51,17 +51,24 @@ def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_t
         abs_quaternions[:, i] = pose[
                                 3:]  # np.roll(pose[3:], -1) uncomment this if the quaternion is saved as [w, x, y, z]
         abs_positions[:, i] = pose[:3]
-
+        # print(f"abs_position: {abs_positions[:, i]}, abs_quaternions: {abs_quaternions[:, i]}")
     upper_indices = [bisect.bisect(pose_timestamps, pt) for pt in requested_timestamps]
     lower_indices = [u - 1 for u in upper_indices]
+
+    # for index, pt in enumerate(requested_timestamps):
+    #     print(f"requested_timestamps: {pt / 1e6}, upper_indices: {pose_timestamps[upper_indices[index]]/ 1e6}, lower_indices: {pose_timestamps[lower_indices[index]]/ 1e6}")
 
     if max(upper_indices) >= len(pose_timestamps):
         upper_indices = [min(i, len(pose_timestamps) - 1) for i in upper_indices]
 
     # print(f"{pose_timestamps[upper_indices]- pose_timestamps[lower_indices]}")
     # print( pose_timestamps[lower_indices])
-    fractions = (requested_timestamps - pose_timestamps[lower_indices]) // \
+    fractions = (requested_timestamps - pose_timestamps[lower_indices]) / \
                 (pose_timestamps[upper_indices] - pose_timestamps[lower_indices])
+    #print(f"requested_timestamps - pose_timestamps[lower_indices]) is {requested_timestamps - pose_timestamps[lower_indices]}")
+    #print(f"pose_timestamps[upper_indices] - pose_timestamps[lower_indices] is {pose_timestamps[upper_indices] - pose_timestamps[lower_indices]}")
+    #for fraction in fractions:
+    #print(f"fractions is {fractions}")
 
     quaternions_lower = abs_quaternions[:, lower_indices]
     quaternions_upper = abs_quaternions[:, upper_indices]
@@ -125,6 +132,7 @@ def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_t
     poses_mat = np.linalg.solve(poses_mat[0:4, 0:4], poses_mat)
 
     poses_out = [0] * (len(requested_timestamps) - 1)
+    
     for i in range(1, len(requested_timestamps)):
         pose_mat = poses_mat[0:4, i * 4:(i + 1) * 4]
         pose_rot = pose_mat.copy()
@@ -134,6 +142,7 @@ def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_t
         pose_quaternion = tfs.quaternion_from_matrix(pose_rot, isprecise=True)  # [w x y z]
         poses_out[i - 1] = [requested_timestamps[i] / 1e6, -pose_position[0], -pose_position[1], pose_position[2],
                             -pose_quaternion[3], -pose_quaternion[2], pose_quaternion[1], pose_quaternion[0]]
+
         # poses_out[i - 1] = poses_mat[0:4, i * 4:(i + 1) * 4]
 
     return poses_out

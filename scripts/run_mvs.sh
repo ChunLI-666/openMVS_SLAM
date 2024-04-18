@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 设置工作目录
-WORK_DIR="/home/icl2sgh/catkin_fastlio_ws/src/FAST_LIO_SLAM/FAST-LIO/result/zhongnan/fastlio_test_0311"
-CMD_DIR="/home/icl2sgh/project/openMVS_build/bin"
+WORK_DIR="/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test-new-extrinsic/MVS_Workspace"
+CMD_DIR="/home/charles/projects/openMVS_build/bin"
 # 输入和输出文件
 INPUT_MVS_FRAME="$WORK_DIR/mvs_frame_result.txt"
 DENSIFY_OUTPUT="mvs_densify.mvs"

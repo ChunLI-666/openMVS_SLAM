@@ -142,7 +142,7 @@ def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_t
         pose_quaternion = tfs.quaternion_from_matrix(pose_rot, isprecise=True)  # [w x y z]
         poses_out[i - 1] = [requested_timestamps[i] / 1e6, -pose_position[0], -pose_position[1], pose_position[2],
                             -pose_quaternion[3], -pose_quaternion[2], pose_quaternion[1], pose_quaternion[0]]
-
+        #print(f"poses_mat[0:4, i * 4:(i + 1) * 4] is {poses_mat[0:4, i * 4:(i + 1) * 4]}")
         # poses_out[i - 1] = poses_mat[0:4, i * 4:(i + 1) * 4]
 
     return poses_out

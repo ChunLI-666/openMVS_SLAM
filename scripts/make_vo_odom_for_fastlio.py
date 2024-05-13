@@ -5,19 +5,19 @@ from pose_interp import interpolate_poses
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# path_to_scan_states = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test-new-extrinsic/visual_odom_in_lidar_ts.txt"
-# path_to_visual_odom_timestamp = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test-new-extrinsic/visual_odom.txt"
+path_to_scan_states = "/home/charles/Documents/zhongnan/fastlio-color/20240507/_2024-05-07-10-57-20-reconstruction/fast_lio_result/visual_odom_in_lidar_ts.txt"
+path_to_visual_odom_timestamp = "/home/charles/Documents/zhongnan/fastlio-color/20240507/_2024-05-07-10-57-20-reconstruction/fast_lio_result/visual_odom.txt"
 
-# path_to_output = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test-new-extrinsic/vo_interpolated_odom.txt"
+path_to_output = "/home/charles/Documents/zhongnan/fastlio-color/20240507/_2024-05-07-10-57-20-reconstruction/fast_lio_result/vo_interpolated_odom.txt"
 
-# path_to_TUM_odometry = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test-new-extrinsic/visual_odom_in_lidar_ts_TUM.txt"
+path_to_TUM_odometry = "/home/charles/Documents/zhongnan/fastlio-color/20240507/_2024-05-07-10-57-20-reconstruction/fast_lio_result/visual_odom_in_lidar_ts_TUM.txt"
 
-path_to_scan_states = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom_in_lidar_ts.txt"
-path_to_visual_odom_timestamp = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom.txt"
+# path_to_scan_states = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom_in_lidar_ts.txt"
+# path_to_visual_odom_timestamp = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom.txt"
 
-path_to_output = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/vo_interpolated_odom.txt"
+# path_to_output = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/vo_interpolated_odom.txt"
 
-path_to_TUM_odometry = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom_in_lidar_ts_TUM.txt"
+# path_to_TUM_odometry = "/home/charles/Documents/zhongnan/fastlio-color/test-offline-color/test03/visual_odom_in_lidar_ts_TUM.txt"
 
 
 # T_lidar_to_cam = np.array()
@@ -112,7 +112,7 @@ def save_camera_odometry(camera_states, file_path):
 
             for ts, position, rotation in camera_states: 
                 # file.write(f"{ts:.6f} {position[0]:.8f} {position[1]:.8f} {position[2]:.8f} {rotation[0]:.8f} {rotation[1]:.8f} {rotation[2]:.8f} {rotation[3]:.8f}\n") 
-                file.write(f"{ts:.6f} {position[0]:.8f} {position[1]:.8f} {position[2]:.8f}  {rotation[3]:.8f} {rotation[0]:.8f} {rotation[1]:.8f} {rotation[2]:.8f}\n") 
+                file.write(f"{ts:.6f} {position[0]:.8f} {position[1]:.8f} {position[2]:.8f} {rotation[3]:.8f} {rotation[0]:.8f} {rotation[1]:.8f} {rotation[2]:.8f}\n") 
 
     except IOError as e:
         logging.error("Failed to write to file %s: %s", file_path, e)
